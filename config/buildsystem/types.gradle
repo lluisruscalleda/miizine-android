@@ -1,0 +1,15 @@
+ext {
+
+    debug = [
+            apiUrl: '"https://miizine.herokuapp.com"',
+    ]
+
+    stage = [
+            apiUrl: '"https://miizine.herokuapp.com"',
+    ]
+
+    prod = [
+            apiUrl: '"https://miizine.herokuapp.com"',
+    ]
+
+}

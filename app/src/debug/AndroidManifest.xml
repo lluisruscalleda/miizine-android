@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.app">
+
+
+  <application
+    android:allowBackup="true"
+    android:name="com.example.app.AndroidApp">
+
+    <meta-data
+      android:name="com.example.app.utils.StethoOkHttpGlideModule"
+      android:value="GlideModule" />
+
+  </application>
+
+</manifest>

@@ -1,0 +1,77 @@
+import java.util.regex.Pattern
+
+apply from: 'config/buildsystem/dependencies.gradle'
+apply from: 'config/buildsystem/types.gradle'
+
+buildscript {
+  repositories {
+    jcenter()
+    maven { url 'https://plugins.gradle.org/m2/' }
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.2.2'
+    classpath "com.neenbedankt.gradle.plugins:android-apt:1.8"
+    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.0.1"
+    classpath "com.fernandocejas.frodo:frodo-plugin:0.8.3"
+    classpath 'net.ltgt.gradle:gradle-apt-plugin:0.6'
+    classpath 'com.google.gms:google-services:3.0.0'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.2'
+    classpath 'com.github.triplet.gradle:play-publisher:1.1.4'
+    classpath 'com.frogermcs.androiddevmetrics:androiddevmetrics-plugin:0.4'
+    classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+  }
+}
+
+allprojects {
+  ext {
+    androidApplicationId = 'com.example.app'
+    androidVersionCode =
+        versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+    androidVersionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+    testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+    testApplicationId = 'com.example.app.test'
+  }
+}
+
+task wrapper(type: Wrapper) {
+  description 'Creates the gradle wrapper.'
+  gradleVersion '2.12'
+}
+
+task runDomainUnitTests(dependsOn: [':domain:test']) {
+  description 'Run unit tests for the domain layer.'
+}
+
+task runDataUnitTests(dependsOn: [':data:testDebugUnitTest']) {
+  description 'Run unit tests for the data layer.'
+}
+
+task runUnitTests(dependsOn: ['runDomainUnitTests', 'runDataUnitTests']) {
+  description 'Run unit tests for both domain and data layers.'
+}
+
+task runAcceptanceTests(dependsOn: [':app:connectedAndroidTest']) {
+  description 'Run application acceptance tests.'
+}
+
+task increaseVersion << {
+  println(":increaseVersion")
+  def propsFile = file("config/buildsystem/dependencies.gradle")
+  def propsText = propsFile.getText()
+  def patternVersionNumber = Pattern.compile("versionBuild = (\\d+)")
+  def matcherVersionNumber = patternVersionNumber.matcher(propsText)
+  def versionMajor = rootProject.ext.versionMajor
+  def versionMinor = rootProject.ext.versionMinor
+  def versionPatch = rootProject.ext.versionPatch
+  def versionBuild = rootProject.ext.versionBuild
+
+  propsText = matcherVersionNumber.replaceAll("versionBuild = " + ++versionBuild)
+  propsFile.write(propsText)
+  println("Bumped version : " + versionMajor +
+      "." +
+      versionMinor +
+      "." +
+      versionPatch +
+      "." +
+      versionBuild)
+}

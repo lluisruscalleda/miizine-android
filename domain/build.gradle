@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'idea'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+configurations {
+  provided
+}
+
+//Include provided for compilation
+sourceSets.main.compileClasspath += configurations.provided
+
+dependencies {
+
+  def domainDependencies = rootProject.ext.domainDependencies
+  def domainTestDependencies = rootProject.ext.domainTestDependencies
+
+  compile domainDependencies.rxJava
+
+  compile domainDependencies.javaxInject
+
+  apt domainDependencies.autoValue
+  compileOnly domainDependencies.autoValue
+
+  testCompile domainTestDependencies.junit
+  testCompile domainTestDependencies.mockito
+}

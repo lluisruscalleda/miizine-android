@@ -1,0 +1,187 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'com.fernandocejas.frodo'
+apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'com.github.triplet.play'
+apply plugin: 'com.frogermcs.androiddevmetrics'
+apply plugin: 'com.jakewharton.hugo'
+
+frodo {
+  enabled = false
+}
+
+android {
+
+  compileSdkVersion rootProject.ext.androidCompileSdkVersion
+  buildToolsVersion rootProject.ext.androidBuildToolsVersion
+
+  defaultConfig {
+    minSdkVersion rootProject.ext.androidMinSdkVersion
+    targetSdkVersion rootProject.ext.androidTargetSdkVersion
+
+    applicationId rootProject.ext.androidApplicationId
+    versionCode rootProject.ext.androidVersionCode
+    versionName rootProject.ext.androidVersionName
+    testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+
+  packagingOptions {
+    exclude 'LICENSE.txt'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/ASL2.0'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/services/javax.annotation.processing.Processor'
+  }
+
+  lintOptions {
+    quiet true
+    abortOnError false
+    ignoreWarnings true
+  }
+
+  signingConfigs {
+    release {
+      def props = new Properties()
+      props.load(new FileInputStream(rootProject.file("config/buildsystem/release.properties")))
+
+      storeFile file(props.keyStore)
+      storePassword props.keyStorePassword
+      keyAlias props.keyAlias
+      keyPassword props.keyAliasPassword
+    }
+  }
+
+  buildTypes {
+    debug {
+
+      def type = rootProject.ext.debug
+      applicationIdSuffix '.debug'
+      buildConfigField "String", "API_URL", type.apiUrl
+      minifyEnabled false
+      debuggable true
+    }
+
+    stage {
+
+      def type = rootProject.ext.stage
+      applicationIdSuffix '.stage'
+      buildConfigField "String", "API_URL", type.apiUrl
+      minifyEnabled true
+      debuggable true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro',
+          'proguard-rules-stage.pro'
+      signingConfig signingConfigs.debug
+    }
+
+    release {
+
+      def type = rootProject.ext.prod
+      buildConfigField "String", "API_URL", type.apiUrl
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
+    }
+  }
+
+}
+
+repositories {
+  jcenter()
+  maven { url "https://clojars.org/repo/" }
+}
+
+dependencies {
+
+  def appDependencies = rootProject.ext.appDependencies
+  def appTestDependencies = rootProject.ext.appTestDependencies
+
+  compile project(':domain')
+  compile project(':data')
+  compile project(':commons')
+
+  apt appDependencies.daggerCompiler
+  compile appDependencies.dagger
+
+  provided appDependencies.javaxAnnotation
+
+  compile appDependencies.support
+  compile appDependencies.appcompat
+  compile appDependencies.design
+  compile appDependencies.recyclerView
+  compile appDependencies.cards
+  compile appDependencies.timber
+  compile appDependencies.activityOnCrash
+  compile appDependencies.glide
+  compile appDependencies.rxJava
+  compile appDependencies.rxAndroid
+  compile appDependencies.threetenabp
+  //compile appDependencies.analyticsServices
+  compile appDependencies.okhttpGlideInteg
+
+  apt appDependencies.autoValue
+  provided appDependencies.autoValueParcel
+
+  compile appDependencies.butterKnife
+  apt appDependencies.butterKnifeProc
+
+  debugCompile appDependencies.leakcanaryDebug
+  stageCompile appDependencies.leakcanaryRelease
+  releaseCompile appDependencies.leakcanaryRelease
+
+  testCompile appTestDependencies.junit
+  testCompile appTestDependencies.assertj
+  testCompile appTestDependencies.robolectric
+
+  androidTestCompile appTestDependencies.mockito
+  androidTestCompile appTestDependencies.dexmaker
+  androidTestCompile appTestDependencies.dexmakerMockito
+
+  androidTestCompile appTestDependencies.supportAnnotations
+
+  androidTestCompile appTestDependencies.runner
+  androidTestCompile appTestDependencies.rules
+  androidTestCompile appTestDependencies.espresso
+  androidTestCompile appTestDependencies.espressoIntent
+  androidTestCompile(appTestDependencies.espressoContrib){
+    exclude module: 'appcompat-v7'
+    exclude module: 'support-v4'
+    exclude module: 'design'
+    exclude module: 'recyclerview-v7'
+  }
+}
+
+dexcount {
+  format = "tree"
+  includeClasses = false
+  includeFieldCount = true
+  includeTotalMethodCount = false
+  orderByMethodCount = false
+  verbose = false
+  maxTreeDepth = Integer.MAX_VALUE
+  teamCityIntegration = false
+}
+
+play {
+  //jsonFile = file('keys.json')
+}
+
+// Copy all apks to accessible folder
+task copyAll {
+  android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+      if (!output.outputFile.name.contains('unsigned')) {
+        task("copy${variant.name.capitalize()}", type: Copy) {
+          from(output.outputFile)
+          into("../apks/")
+        }
+        dependsOn("copy${variant.name.capitalize()}")
+      }
+    }
+  }
+}
