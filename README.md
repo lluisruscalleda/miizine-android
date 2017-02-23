@@ -1,6 +1,9 @@
 miiZine Android App
 =================
 
+Android App for miiZine project: [26]
+
+Simple list items from miiZine API.
 
 Libraries / Patterns
 -----------------
@@ -75,3 +78,4 @@ License
 [23]:https://github.com/rharter/auto-value-parcel
 [24]:https://github.com/rharter/auto-value-gson
 [25]:https://github.com/vichid/ship-android-fast
+[26]:https://github.com/lluisruscalleda/miizine
