@@ -1,13 +1,11 @@
-Ship Android Fast
+miiZine Android App
 =================
-[![Build Status](https://travis-ci.org/vichid/Ship-Android-Fast.svg?branch=master)](https://travis-ci.org/vichid/Ship-Android-Fast) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-
-This repository has been created to allow me to bootstrap everything I think it's necessary nowadays in an android app.
 
 
 Libraries / Patterns
 -----------------
 
+* [Ship Android Fast][25]
 * [Clean Architecture][21]
 * [Support Libraries][1]
 * [RxJava][2]
@@ -76,3 +74,4 @@ License
 [22]:https://github.com/google/auto
 [23]:https://github.com/rharter/auto-value-parcel
 [24]:https://github.com/rharter/auto-value-gson
+[25]:https://github.com/vichid/ship-android-fast
